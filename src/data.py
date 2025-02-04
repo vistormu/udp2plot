@@ -14,7 +14,13 @@ class Data:
 
         self.path = path
         if not os.path.exists(self.path) and self.save_:
-            os.makedirs(self.path)
+            echo(
+                "-> specified path does not exist\n",
+                f"   |> path: {self.path}\n",
+                "   |> data will not be saved\n\n",
+                pipeline="yellow2,0,reset,1,2",
+            )
+            self.save_ = False
 
     def update(self, d: dict[str, float]) -> None:
         for k, v in d.items():
@@ -33,8 +39,8 @@ class Data:
 
         echo(
             "-> data saved\n",
-            f"   |> path: {filename}\n",
-            pipeline="green,0,reset,1",
+            f"   |> path: {filename}\n\n",
+            pipeline="cyan,0,reset,1",
         )
 
     def clear(self) -> None:

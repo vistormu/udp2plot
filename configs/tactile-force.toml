@@ -4,8 +4,8 @@ port = 8080
 timeout = 1
 
 [data]
-save = false
-path = "data/"
+save = true
+path = "/Users/vistor/Documents/tmp_/tactile-data/raspi-data/"
 date_format = "%d-%m-%Y_%H-%M-%S"
 
 [figure]
@@ -21,27 +21,27 @@ size = [14, 8] # inches
 
 [plot.upper_left]
 x = "time"
-signals = ["s0b", "s1b", "s2b", "s3b"]
-colors = ["red", "green", "blue", "yellow"]
-limits = [0, 5]
-title = "values"
-ylabel = "value (%)"
-
-[plot.lower_left]
-x = "time"
-signals = ["s0v", "s1v", "s2v", "s3v"]
-colors = ["red", "green", "blue", "yellow"]
-limits = [0, 5]
-title = "values simplified"
-ylabel = "value (%)"
-
-[plot.right]
-x = "time"
 signals = ["fx", "fy", "fz"]
 colors = ["black", "blue", "green"]
 limits = [-3, 0]
 title = "force"
 ylabel = "force (N)"
+
+[plot.lower_left]
+x = "time"
+signals = ["mx", "my", "mz"]
+colors = ["black", "blue", "green"]
+limits = [-2, 2]
+title = "torque"
+ylabel = "torque (Nm)"
+
+[plot.right]
+x = "time"
+signals = ["s0", "s1", "s2", "s3"]
+colors = ["red", "green", "blue", "yellow"]
+limits = [0, 10]
+title = "values"
+ylabel = "value (%)"
 
 [colors]
 red = "#cf7171"

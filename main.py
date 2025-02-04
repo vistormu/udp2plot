@@ -8,6 +8,8 @@ from src import (
     Data,
 )
 
+from echro import echo
+
 
 def get(data: queue.Queue):
     try:
@@ -66,6 +68,13 @@ def main(path: str) -> None:
             plotter.update(data)
 
         except KeyboardInterrupt:
+            echo(
+                "-> user interrupt\n",
+                "   |> closing server\n",
+                "   |> closing plotter\n\n",
+                pipeline="yellow,0,reset,1,2",
+            )
+
             server.stop()
             plotter.close()
             break

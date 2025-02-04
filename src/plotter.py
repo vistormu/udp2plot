@@ -7,6 +7,7 @@ import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
 import numpy as np
 
+from echro import echo
 from .config import Config
 from .data import Data
 
@@ -56,6 +57,15 @@ class Plotter:
         self.path = config.figure.path
         self.date_format = config.figure.date_format
         self.format = config.figure.format
+
+        if not os.path.exists(self.path) and self.save_:
+            echo(
+                "-> specified path does not exist\n",
+                f"   |> path: {self.path}\n",
+                "   |> data will not be saved\n\n",
+                pipeline="yellow2,0,reset,1,2",
+            )
+            self.save_ = False
 
         window = int(config.plot.time_window / config.plot.dt)
         upper_left = PlotInfo(
@@ -145,6 +155,12 @@ class Plotter:
         date = datetime.datetime.now().strftime(self.date_format)
         filename = os.path.join(self.path, f"{date}.{self.format}")
         plt.savefig(filename)
+
+        echo(
+            "-> figure saved\n",
+            f"   |> path: {filename}\n\n",
+            pipeline="cyan,0,reset,1",
+        )
 
     def clear(self) -> None:
         self.up_left_ax.clear()
