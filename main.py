@@ -1,5 +1,4 @@
 import queue
-import os
 import argparse
 
 from src import (
@@ -29,10 +28,10 @@ def main(path: str) -> None:
     server.start(config.server.ip, config.server.port)
 
     # plots
-    plotter = Plotter(config=config)
+    plotter = Plotter(config)
 
     # data
-    data = Data(path=config.data.path, save=config.data.save)
+    data = Data(config.data.path, config.data.save, config.data.date_format)
 
     client_connected = False
 
@@ -42,23 +41,28 @@ def main(path: str) -> None:
 
             # continue until a client connects
             if event != "connected" and not client_connected:
+                plotter.draw()
                 continue
 
-            client_connected = True
-
-            # reset plots and save data if the client just disconnected
-            if event == "disconnected":
-                client_connected = False
+            # client has just connected
+            if event == "connected" and not client_connected:
+                client_connected = True
+                data.clear()
                 plotter.clear()
-                data.save(config.data.format)
-                # plotter.show()
+
+            # client has just disconnected
+            if event == "disconnected" and client_connected:
+                client_connected = False
+
+                data.save()
+                plotter.save()
+
                 continue
 
-            # get data from the server
+            # while client is connected
             while not data_queue.empty():
                 data.update(data_queue.get())
 
-            # update plots
             plotter.update(data)
 
         except KeyboardInterrupt:

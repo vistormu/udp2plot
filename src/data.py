@@ -7,9 +7,10 @@ from echro import echo
 
 
 class Data:
-    def __init__(self, path: str, save: bool) -> None:
+    def __init__(self, path: str, save: bool, date_format: str) -> None:
         self.data: dict[str, list[float]] = {}
         self.save_ = save
+        self.date_format = date_format
 
         self.path = path
         if not os.path.exists(self.path) and self.save_:
@@ -22,11 +23,11 @@ class Data:
             else:
                 self.data[k] = [v]
 
-    def save(self, format: str) -> None:
+    def save(self) -> None:
         if not self.save_ or not self.data:
             return
 
-        date = datetime.datetime.now().strftime(format)
+        date = datetime.datetime.now().strftime(self.date_format)
         filename = os.path.join(self.path, f"{date}.csv")
         pd.DataFrame(self.data).to_csv(filename, index=False)
 
@@ -36,6 +37,7 @@ class Data:
             pipeline="green,0,reset,1",
         )
 
+    def clear(self) -> None:
         self.data.clear()
 
     def __getitem__(self, key: str) -> np.ndarray:

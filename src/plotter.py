@@ -1,3 +1,5 @@
+import datetime
+import os
 from dataclasses import dataclass
 
 from matplotlib.axes import Axes
@@ -50,6 +52,11 @@ class AxInfo:
 
 class Plotter:
     def __init__(self, config: Config) -> None:
+        self.save_ = config.figure.save
+        self.path = config.figure.path
+        self.date_format = config.figure.date_format
+        self.format = config.figure.format
+
         window = int(config.plot.time_window / config.plot.dt)
         upper_left = PlotInfo(
             signals=config.plot.upper_left.signals,
@@ -78,6 +85,7 @@ class Plotter:
 
         # init plots
         plt.figure(figsize=config.plot.size)
+        plt.tight_layout()
         gs = gridspec.GridSpec(2, 2, width_ratios=[0.45, 0.55])
 
         self.up_left_ax = self._init_ax(upper_left, gs, 0, window)
@@ -116,11 +124,6 @@ class Plotter:
 
         return AxInfo(ax, lines, plot_info.signals, window)
 
-    def clear(self) -> None:
-        self.up_left_ax.clear()
-        self.down_left_ax.clear()
-        self.right_ax.clear()
-
     def update(self, data: Data) -> None:
         plt.ion()
 
@@ -129,12 +132,24 @@ class Plotter:
         self.down_left_ax.update(data["time"], [data[s] for s in self.down_left_ax.signals])
         self.right_ax.update(data["time"], [data[s] for s in self.right_ax.signals])
 
+        self.draw()
+
+    def draw(self) -> None:
         plt.draw()
         plt.pause(0.001)
 
-    def show(self) -> None:
-        plt.ioff()
-        plt.show()
+    def save(self) -> None:
+        if not self.save_:
+            return
+
+        date = datetime.datetime.now().strftime(self.date_format)
+        filename = os.path.join(self.path, f"{date}.{self.format}")
+        plt.savefig(filename)
+
+    def clear(self) -> None:
+        self.up_left_ax.clear()
+        self.down_left_ax.clear()
+        self.right_ax.clear()
 
     def close(self):
         plt.ioff()

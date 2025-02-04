@@ -3,6 +3,7 @@ import tomllib
 
 
 class AxisConfig(NamedTuple):
+    x: str
     signals: list[str]
     colors: list[str]
     limits: tuple[float, float]
@@ -28,12 +29,20 @@ class ServerConfig(NamedTuple):
 class DataConfig(NamedTuple):
     save: bool
     path: str
+    date_format: str
+
+
+class FigureConfig(NamedTuple):
+    save: bool
+    path: str
+    date_format: str
     format: str
 
 
 class Config(NamedTuple):
     server: ServerConfig
     data: DataConfig
+    figure: FigureConfig
     plot: PlotConfig
 
 
@@ -59,10 +68,18 @@ def load_config(path: str) -> Config:
     data = DataConfig(
         save=config["data"]["save"],
         path=config["data"]["path"],
-        format=config["data"]["format"],
+        date_format=config["data"]["date_format"],
+    )
+
+    figure = FigureConfig(
+        save=config["figure"]["save"],
+        path=config["figure"]["path"],
+        date_format=config["figure"]["date_format"],
+        format=config["figure"]["format"],
     )
 
     upper_left = AxisConfig(
+        x=config["plot"]["upper_left"]["x"],
         signals=config["plot"]["upper_left"]["signals"],
         colors=[colors[color] for color in config["plot"]["upper_left"]["colors"]],
         limits=config["plot"]["upper_left"]["limits"],
@@ -71,6 +88,7 @@ def load_config(path: str) -> Config:
     )
 
     lower_left = AxisConfig(
+        x=config["plot"]["lower_left"]["x"],
         signals=config["plot"]["lower_left"]["signals"],
         colors=[colors[color] for color in config["plot"]["lower_left"]["colors"]],
         limits=config["plot"]["lower_left"]["limits"],
@@ -79,6 +97,7 @@ def load_config(path: str) -> Config:
     )
 
     right = AxisConfig(
+        x=config["plot"]["right"]["x"],
         signals=config["plot"]["right"]["signals"],
         colors=[colors[color] for color in config["plot"]["right"]["colors"]],
         limits=config["plot"]["right"]["limits"],
@@ -98,5 +117,6 @@ def load_config(path: str) -> Config:
     return Config(
         server=server,
         data=data,
+        figure=figure,
         plot=plot,
     )

@@ -1,0 +1,52 @@
+[server]
+ip = "145.94.124.38"
+port = 8080
+timeout = 1
+
+[data]
+save = false
+path = "data/"
+date_format = "%d-%m-%Y_%H-%M-%S"
+
+[figure]
+save = false
+path = "figures/"
+format = "png"
+date_format = "%d-%m-%Y_%H-%M-%S"
+
+[plot]
+time_window = 60 # s
+dt = 0.01 # s
+size = [14, 8] # inches
+
+[plot.upper_left]
+x = "time"
+signals = ["s0b", "s1b", "s2b", "s3b"]
+colors = ["red", "green", "blue", "yellow"]
+limits = [0, 5]
+title = "values"
+ylabel = "value (%)"
+
+[plot.lower_left]
+x = "time"
+signals = ["s0v", "s1v", "s2v", "s3v"]
+colors = ["red", "green", "blue", "yellow"]
+limits = [0, 5]
+title = "values simplified"
+ylabel = "value (%)"
+
+[plot.right]
+x = "time"
+signals = ["fx", "fy", "fz"]
+colors = ["black", "blue", "green"]
+limits = [-3, 0]
+title = "force"
+ylabel = "force (N)"
+
+[colors]
+red = "#cf7171"
+green = "#dbe8c1"
+blue = "#aecdd2"
+yellow = "#fadf7f"
+purple = "#c696bc"
+black = "#4d5359"
