@@ -16,6 +16,18 @@ def exception_handler(func):
     return wrapper
 
 
+def get_local_ip():
+    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    try:
+        s.connect(("8.8.8.8", 80))  # Connects to Google's DNS
+        ip = s.getsockname()[0]
+    except Exception:
+        ip = "Unable to determine IP"
+    finally:
+        s.close()
+    return ip
+
+
 class Server:
     def __init__(self,
                  data_queue: queue.Queue,
@@ -33,6 +45,9 @@ class Server:
         self.running = False
 
     def start(self, host: str, port: int) -> None:
+        if host == "auto":
+            host = get_local_ip()
+
         self.server_thread = threading.Thread(target=self._start, args=(host, port))
         self.server_thread.start()
 

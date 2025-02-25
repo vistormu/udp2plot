@@ -1,38 +1,18 @@
 [server]
-ip = "10.118.70.12"
+ip = "auto"
 port = 8080
-timeout = 1
+timeout = 2
 
 [data]
 save = true
 path = "data/"
 format = "%d-%m-%Y_%H-%M-%S"
 
-[plot]
-time_window = 120 # s
-dt = 0.01 # s
-size = [14, 8] # inches
-
-[plot.upper_left]
-signals = ["voltage", "voltage_filt"]
-colors = ["black", "blue"]
-limits = [0, 5]
-title = "Voltage"
-ylabel = "Voltage (V)"
-
-[plot.lower_left]
-signals = ["reference", "strain"]
-colors = ["black", "red"]
-limits = [0, 50]
-title = "Reference and Strain"
-ylabel = "Strain (%)"
-
-[plot.right]
-signals = ["voltage_rel", "voltage_filt_rel"]
-colors = ["black", "yellow"]
-limits = [0, 100]
-title = "AR/R (%)"
-ylabel = "AR/R (%)"
+[figure]
+save = false
+path = "figures/"
+format = "png"
+date_format = "%d-%m-%Y_%H-%M-%S"
 
 [colors]
 red = "#cf7171"
@@ -41,3 +21,39 @@ blue = "#aecdd2"
 yellow = "#fadf7f"
 purple = "#c696bc"
 black = "#4d5359"
+
+[plot]
+layout = "2x2"
+time_window = 120 # s
+dt = 0.01 # s
+size = [14, 8] # inches
+padding = 0.05
+
+[plot."(0,0)"]
+x = "time"
+y = ["voltage", "voltage_filt"]
+colors = ["black", "blue"]
+xlabel = "time (s)"
+ylabel = "Voltage (V)"
+limits = [0, 5]
+title = "Voltage"
+n_ticks = 10
+
+[plot."(1,0)"]
+x = "time"
+y = ["strain", "reference"]
+colors = ["red", "black"]
+xlabel = "time (s)"
+ylabel = "Strain (%)"
+limits = [0, 50]
+title = "Strain and Reference"
+n_ticks = 10
+
+[plot."(:,1)"]
+x = "time"
+y = ["voltage_rel", "voltage_filt_rel"]
+xlabel = "time (s)"
+ylabel = "AR/R (%)"
+limits = [0, 100]
+title = "AR/R (%)"
+n_ticks = 50

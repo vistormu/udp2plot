@@ -1,11 +1,11 @@
 [server]
-ip = "145.94.124.38"
+ip = "auto"
 port = 8080
-timeout = 1
+timeout = 2
 
 [data]
-save = true
-path = "/Users/vistor/Documents/tmp_/tactile-data/raspi-data/"
+save = false
+path = "data/"
 date_format = "%d-%m-%Y_%H-%M-%S"
 
 [figure]
@@ -14,35 +14,6 @@ path = "figures/"
 format = "png"
 date_format = "%d-%m-%Y_%H-%M-%S"
 
-[plot]
-time_window = 60 # s
-dt = 0.01 # s
-size = [14, 8] # inches
-
-[plot.upper_left]
-x = "time"
-signals = ["fx", "fy", "fz"]
-colors = ["black", "blue", "green"]
-limits = [-3, 0]
-title = "force"
-ylabel = "force (N)"
-
-[plot.lower_left]
-x = "time"
-signals = ["mx", "my", "mz"]
-colors = ["black", "blue", "green"]
-limits = [-2, 2]
-title = "torque"
-ylabel = "torque (Nm)"
-
-[plot.right]
-x = "time"
-signals = ["s0", "s1", "s2", "s3"]
-colors = ["red", "green", "blue", "yellow"]
-limits = [0, 10]
-title = "values"
-ylabel = "value (%)"
-
 [colors]
 red = "#cf7171"
 green = "#dbe8c1"
@@ -50,3 +21,41 @@ blue = "#aecdd2"
 yellow = "#fadf7f"
 purple = "#c696bc"
 black = "#4d5359"
+
+[plot]
+layout = "2x2"
+time_window = 30 # s
+dt = 0.01 # s
+size = [14, 8] # inches
+padding = 0.05
+
+[plot."(0,0)"]
+x = "time"
+y = ["fx", "fy", "fz"]
+colors = ["red", "green", "blue"]
+xlabel = "time (s)"
+ylabel = "force (N)"
+limits = [-2, 2]
+title = "force"
+n_ticks = 10
+
+[plot."(1,0)"]
+x = "time"
+y = ["mx", "my", "mz"]
+colors = ["red", "green", "blue"]
+xlabel = "time (s)"
+ylabel = "torque (Nm)"
+limits = [-1, 1]
+title = "torque"
+n_ticks = 10
+
+[plot."(:,1)"]
+x = "time"
+y = ["s0", "s1", "s2", "s3"]
+xlabel = "time (s)"
+ylabel = "value (%)"
+colors = ["red", "green", "blue", "yellow"]
+limits = [-5, 30]
+title = "values"
+n_ticks = 20
+

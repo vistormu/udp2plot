@@ -13,20 +13,11 @@ from .data import Data
 
 
 @dataclass
-class PlotInfo:
-    signals: list[str]
-    limits: tuple[float, float]
-    title: str
-    y_label: str
-    x_label: str
-    color: list[str]
-
-
-@dataclass
 class AxInfo:
     ax: Axes
+    x: str
+    y: list[str]
     lines: list
-    signals: list[str]
     window: int
 
     def update(self, t: np.ndarray, y: list[np.ndarray]) -> None:
@@ -38,7 +29,7 @@ class AxInfo:
             t = t[-self.window:]
             y = [y_[-self.window:] for y_ in y]
 
-        for i in range(len(self.signals)):
+        for i in range(len(self.y)):
             self.lines[i].set_xdata(t)
             self.lines[i].set_ydata(y[i])
 
@@ -46,7 +37,7 @@ class AxInfo:
         self.ax.autoscale_view(True, True, True)
 
     def clear(self) -> None:
-        for i in range(len(self.signals)):
+        for i in range(len(self.y)):
             self.lines[i].set_ydata(np.zeros(self.window))
             self.lines[i].set_xdata(np.zeros(self.window))
 
@@ -68,79 +59,62 @@ class Plotter:
             self.save_ = False
 
         window = int(config.plot.time_window / config.plot.dt)
-        upper_left = PlotInfo(
-            signals=config.plot.upper_left.signals,
-            limits=config.plot.upper_left.limits,
-            title=config.plot.upper_left.title,
-            y_label=config.plot.upper_left.ylabel,
-            x_label="Time (s)",
-            color=config.plot.upper_left.colors,
-        )
-        lower_left = PlotInfo(
-            signals=config.plot.lower_left.signals,
-            limits=config.plot.lower_left.limits,
-            title=config.plot.lower_left.title,
-            y_label=config.plot.lower_left.ylabel,
-            x_label="Time (s)",
-            color=config.plot.lower_left.colors,
-        )
-        right = PlotInfo(
-            signals=config.plot.right.signals,
-            limits=config.plot.right.limits,
-            title=config.plot.right.title,
-            y_label=config.plot.right.ylabel,
-            x_label="Time (s)",
-            color=config.plot.right.colors,
-        )
+
+        rows, cols = map(int, config.plot.layout.split("x"))
 
         # init plots
         plt.figure(figsize=config.plot.size)
         plt.tight_layout()
-        gs = gridspec.GridSpec(2, 2, width_ratios=[0.45, 0.55])
+        gs = gridspec.GridSpec(rows, cols)
 
-        self.up_left_ax = self._init_ax(upper_left, gs, 0, window)
-        self.down_left_ax = self._init_ax(lower_left, gs, 1, window)
-        self.right_ax = self._init_ax(right, gs, 2, window)
+        self.axes = []
+        for ax_info in config.plot.axes:
+            location = ax_info.location.replace(":", "slice(None)")
+            location = eval(location)
+            ax = plt.subplot(gs[location])
 
-    def _init_ax(self, plot_info: PlotInfo, gs: gridspec.GridSpec, position: int, window: int) -> AxInfo:
-        match position:
-            case 0:
-                ax = plt.subplot(gs[0, 0])
-            case 1:
-                ax = plt.subplot(gs[1, 0])
-            case 2:
-                ax = plt.subplot(gs[:, 1])
-            case _:
-                raise ValueError("wrong number of plots")
+            x = np.zeros(window)
+            y = [np.zeros(window) for _ in ax_info.y]
 
-        n_signals = len(plot_info.signals)
-        t = np.zeros(window)
-        y = np.zeros(window)
+            lines = []
+            for i in range(len(ax_info.y)):
+                line, = ax.plot(x, y[i], label=ax_info.y[i], color=ax_info.colors[i])
+                lines.append(line)
 
-        lines = []
-        ys = []
-        for i in range(n_signals):
-            line, = ax.plot(t, y, label=plot_info.signals[i], color=plot_info.color[i])
-            lines.append(line)
-            ys.append(y)
+            ax.set_title(ax_info.title)
+            ax.set_ylabel(ax_info.ylabel)
+            ax.set_xlabel(ax_info.xlabel)
 
-        ax.set_title(plot_info.title)
-        ax.set_ylabel(plot_info.y_label)
-        ax.set_xlabel(plot_info.x_label)
-        ax.set_ylim(plot_info.limits[0]-1, plot_info.limits[1]+1)
-        ax.grid(alpha=0.5)
-        ax.legend()
-        ax.autoscale_view(True, True, True)
+            # 10% of the range as padding
+            p = config.plot.padding / 100
+            y_lower = ax_info.limits[0] - p * (ax_info.limits[1] - ax_info.limits[0])
+            y_upper = ax_info.limits[1] + p * (ax_info.limits[1] - ax_info.limits[0])
+            ax.set_ylim(y_lower, y_upper)
 
-        return AxInfo(ax, lines, plot_info.signals, window)
+            # set number of ticks
+            ax.yaxis.set_major_locator(plt.MaxNLocator(ax_info.n_ticks))  # type: ignore
+
+            ax.grid(alpha=0.5)
+            ax.legend()
+
+            ax.autoscale_view(True, True, True)
+
+            self.axes.append(AxInfo(
+                ax=ax,
+                x=ax_info.x,
+                y=ax_info.y,
+                lines=lines,
+                window=window,
+            ))
 
     def update(self, data: Data) -> None:
         plt.ion()
 
-        # update plots
-        self.up_left_ax.update(data["time"], [data[s] for s in self.up_left_ax.signals])
-        self.down_left_ax.update(data["time"], [data[s] for s in self.down_left_ax.signals])
-        self.right_ax.update(data["time"], [data[s] for s in self.right_ax.signals])
+        for ax in self.axes:
+            ax.update(
+                data[ax.x],
+                [data[s] for s in ax.y],
+            )
 
         self.draw()
 
@@ -163,9 +137,8 @@ class Plotter:
         )
 
     def clear(self) -> None:
-        self.up_left_ax.clear()
-        self.down_left_ax.clear()
-        self.right_ax.clear()
+        for ax in self.axes:
+            ax.clear()
 
     def close(self):
         plt.ioff()

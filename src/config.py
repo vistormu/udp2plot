@@ -3,21 +3,24 @@ import tomllib
 
 
 class AxisConfig(NamedTuple):
+    location: str
     x: str
-    signals: list[str]
+    y: list[str]
+    xlabel: str
+    ylabel: str
     colors: list[str]
     limits: tuple[float, float]
     title: str
-    ylabel: str
+    n_ticks: int
 
 
 class PlotConfig(NamedTuple):
+    layout: str
     time_window: int
     dt: float
     size: tuple[int, int]
-    upper_left: AxisConfig
-    lower_left: AxisConfig
-    right: AxisConfig
+    padding: float
+    axes: list[AxisConfig]
 
 
 class ServerConfig(NamedTuple):
@@ -50,14 +53,7 @@ def load_config(path: str) -> Config:
     with open(path, "rb") as f:
         config = tomllib.load(f)
 
-    colors = {
-        "red": config["colors"]["red"],
-        "green": config["colors"]["green"],
-        "blue": config["colors"]["blue"],
-        "yellow": config["colors"]["yellow"],
-        "purple": config["colors"]["purple"],
-        "black": config["colors"]["black"],
-    }
+    colors = config.get("colors", {})
 
     server = ServerConfig(
         ip=config["server"]["ip"],
@@ -78,40 +74,24 @@ def load_config(path: str) -> Config:
         format=config["figure"]["format"],
     )
 
-    upper_left = AxisConfig(
-        x=config["plot"]["upper_left"]["x"],
-        signals=config["plot"]["upper_left"]["signals"],
-        colors=[colors[color] for color in config["plot"]["upper_left"]["colors"]],
-        limits=config["plot"]["upper_left"]["limits"],
-        title=config["plot"]["upper_left"]["title"],
-        ylabel=config["plot"]["upper_left"]["ylabel"],
-    )
-
-    lower_left = AxisConfig(
-        x=config["plot"]["lower_left"]["x"],
-        signals=config["plot"]["lower_left"]["signals"],
-        colors=[colors[color] for color in config["plot"]["lower_left"]["colors"]],
-        limits=config["plot"]["lower_left"]["limits"],
-        title=config["plot"]["lower_left"]["title"],
-        ylabel=config["plot"]["lower_left"]["ylabel"],
-    )
-
-    right = AxisConfig(
-        x=config["plot"]["right"]["x"],
-        signals=config["plot"]["right"]["signals"],
-        colors=[colors[color] for color in config["plot"]["right"]["colors"]],
-        limits=config["plot"]["right"]["limits"],
-        title=config["plot"]["right"]["title"],
-        ylabel=config["plot"]["right"]["ylabel"],
-    )
-
+    # axes
     plot = PlotConfig(
-        time_window=config["plot"]["time_window"],
-        dt=config["plot"]["dt"],
-        size=config["plot"]["size"],
-        upper_left=upper_left,
-        lower_left=lower_left,
-        right=right,
+        layout=config["plot"].pop("layout"),
+        time_window=config["plot"].pop("time_window"),
+        dt=config["plot"].pop("dt"),
+        size=config["plot"].pop("size"),
+        padding=config["plot"].pop("padding"),
+        axes=[AxisConfig(
+            location=name,
+            x=config["plot"][name]["x"],
+            y=config["plot"][name]["y"],
+            xlabel=config["plot"][name]["xlabel"],
+            ylabel=config["plot"][name]["ylabel"],
+            colors=[colors.get(color, color) for color in config["plot"][name]["colors"]],
+            limits=config["plot"][name]["limits"],
+            title=config["plot"][name]["title"],
+            n_ticks=config["plot"][name]["n_ticks"],
+        ) for name in config["plot"].keys()],
     )
 
     return Config(
