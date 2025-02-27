@@ -27,7 +27,7 @@ layout = "2x2"
 time_window = 120 # s
 dt = 0.01 # s
 size = [14, 8] # inches
-padding = 0.05
+padding = 5
 
 [plot."(0,0)"]
 x = "time"

@@ -6,9 +6,8 @@ from src import (
     Plotter,
     load_config,
     Data,
+    ansi,
 )
-
-from echro import echo
 
 
 def get(data: queue.Queue):
@@ -68,11 +67,12 @@ def main(path: str) -> None:
             plotter.update(data)
 
         except KeyboardInterrupt:
-            echo(
-                "-> user interrupt\n",
-                "   |> closing server\n",
-                "   |> closing plotter\n\n",
-                pipeline="yellow,0,reset,1,2",
+            print(
+                f"{ansi.BOLD}{ansi.YELLOW}-> user interrupt{ansi.RESET}",
+                "   |> closing server",
+                "   |> closing plotter",
+                sep="\n",
+                end="\n\n",
             )
 
             server.stop()

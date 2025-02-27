@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
 import numpy as np
 
-from echro import echo
+from . import ansi
 from .config import Config
 from .data import Data
 
@@ -50,12 +50,14 @@ class Plotter:
         self.format = config.figure.format
 
         if not os.path.exists(self.path) and self.save_:
-            echo(
-                "-> specified path does not exist\n",
-                f"   |> path: {self.path}\n",
-                "   |> data will not be saved\n\n",
-                pipeline="yellow2,0,reset,1,2",
+            print(
+                f"{ansi.BOLD}{ansi.YELLOW_BRIGHT}-> specified path does not exist{ansi.RESET}",
+                f"   |> path: {self.path}",
+                "   |> data will not be saved",
+                sep="\n",
+                end="\n\n",
             )
+
             self.save_ = False
 
         window = int(config.plot.time_window / config.plot.dt)
@@ -130,10 +132,11 @@ class Plotter:
         filename = os.path.join(self.path, f"{date}.{self.format}")
         plt.savefig(filename)
 
-        echo(
-            "-> figure saved\n",
-            f"   |> path: {filename}\n\n",
-            pipeline="cyan,0,reset,1",
+        print(
+            f"{ansi.BOLD}{ansi.CYAN}-> figure saved{ansi.RESET}",
+            f"   |> path: {filename}",
+            sep="\n",
+            end="\n\n",
         )
 
     def clear(self) -> None:

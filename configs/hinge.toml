@@ -1,0 +1,40 @@
+[server]
+ip = "auto"
+port = 8080
+timeout = 2
+
+[data]
+save = false
+path = "data/"
+date_format = "%d-%m-%Y_%H-%M-%S"
+
+[figure]
+save = false
+path = "figures/"
+format = "png"
+date_format = "%d-%m-%Y_%H-%M-%S"
+
+[colors]
+red = "#cf7171"
+green = "#dbe8c1"
+blue = "#aecdd2"
+yellow = "#fadf7f"
+purple = "#c696bc"
+black = "#4d5359"
+
+[plot]
+layout = "1x1"
+time_window = 30 # s
+dt = 0.01 # s
+size = [14, 8] # inches
+padding = 5
+
+[plot."(0,0)"]
+x = "time"
+y = ["angle"]
+colors = ["red"]
+xlabel = "time (s)"
+ylabel = "angle (deg)"
+limits = [0, 360]
+title = "angle"
+n_ticks = 60

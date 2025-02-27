@@ -4,7 +4,7 @@ import json
 import threading
 import time
 
-from echro import echo
+from . import ansi
 
 
 def exception_handler(func):
@@ -16,15 +16,18 @@ def exception_handler(func):
     return wrapper
 
 
-def get_local_ip():
+def get_local_ip() -> str:
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     try:
         s.connect(("8.8.8.8", 80))  # Connects to Google's DNS
         ip = s.getsockname()[0]
+
     except Exception:
-        ip = "Unable to determine IP"
+        ip = "not found"
+
     finally:
         s.close()
+
     return ip
 
 
@@ -48,6 +51,16 @@ class Server:
         if host == "auto":
             host = get_local_ip()
 
+        if host == "not found":
+            print(
+                f"{ansi.BOLD}{ansi.YELLOW_BRIGHT}-> could not find local ip{ansi.RESET}",
+                "   |> starting server on localhost",
+                "   |> specify ip manually to avoid this message",
+                sep="\n",
+                end="\n\n",
+            )
+            host = "localhost"
+
         self.server_thread = threading.Thread(target=self._start, args=(host, port))
         self.server_thread.start()
 
@@ -56,11 +69,12 @@ class Server:
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self.socket.bind((host, port))
 
-        echo(
-            "-> server started\n",
-            f"   |> host: {host}\n",
-            f"   |> port: {port}\n\n",
-            pipeline="blue,0,reset,1,2",
+        print(
+            f"{ansi.BOLD}{ansi.BLUE}-> server started{ansi.RESET}",
+            f"   |> host: {host}",
+            f"   |> port: {port}",
+            sep="\n",
+            end="\n\n",
         )
 
         self.socket.settimeout(0.1)
@@ -76,11 +90,12 @@ class Server:
                 if self.client_address is None:
                     self.client_address = addr
 
-                    echo(
-                        "-> client connected\n",
-                        f"  |> ip: {addr[0]}\n",
-                        f"  |> port: {addr[1]}\n\n",
-                        pipeline="green,0,reset,1,2",
+                    print(
+                        f"{ansi.BOLD}{ansi.GREEN}-> client connected{ansi.RESET}",
+                        f"   |> ip: {addr[0]}",
+                        f"   |> port: {addr[1]}",
+                        sep="\n",
+                        end="\n\n",
                     )
 
                     self.event_queue.put("connected")
@@ -93,11 +108,12 @@ class Server:
                     if now - self.last_data_time > self.timeout:
                         self.event_queue.put("disconnected")
 
-                        echo(
-                            "-> client disconnected\n",
-                            f"  |> ip: {self.client_address[0]}\n",
-                            f"  |> port: {self.client_address[1]}\n\n",
-                            pipeline="red,0,reset,1,2",
+                        print(
+                            f"{ansi.BOLD}{ansi.RED}-> client disconnected{ansi.RESET}",
+                            f"   |> ip: {self.client_address[0]}",
+                            f"   |> port: {self.client_address[1]}",
+                            sep="\n",
+                            end="\n\n",
                         )
 
                         self.client_address = None

@@ -3,7 +3,7 @@ import datetime
 import pandas as pd
 import numpy as np
 
-from echro import echo
+from . import ansi
 
 
 class Data:
@@ -11,14 +11,16 @@ class Data:
         self.data: dict[str, list[float]] = {}
         self.save_ = save
         self.date_format = date_format
+        self.unkown_keys = set()
 
         self.path = path
         if not os.path.exists(self.path) and self.save_:
-            echo(
-                "-> specified path does not exist\n",
-                f"   |> path: {self.path}\n",
-                "   |> data will not be saved\n\n",
-                pipeline="yellow2,0,reset,1,2",
+            print(
+                f"{ansi.BOLD}{ansi.YELLOW_BRIGHT}-> specified path does not exist{ansi.RESET}",
+                f"   |>{self.path}",
+                "   |> data will not be saved",
+                sep="\n",
+                end="\n\n",
             )
             self.save_ = False
 
@@ -37,10 +39,10 @@ class Data:
         filename = os.path.join(self.path, f"{date}.csv")
         pd.DataFrame(self.data).to_csv(filename, index=False)
 
-        echo(
-            "-> data saved\n",
-            f"   |> path: {filename}\n\n",
-            pipeline="cyan,0,reset,1",
+        print(
+            f"{ansi.BOLD}{ansi.GREEN}-> data saved{ansi.RESET}\n",
+            f"   |> path: {filename}\n",
+            sep="",
         )
 
     def clear(self) -> None:
@@ -48,11 +50,12 @@ class Data:
 
     def __getitem__(self, key: str) -> np.ndarray:
         data = self.data.get(key, [])
-        if not data:
-            echo(
-                "-> unknown key recieved\n",
-                f"   |>{key}\n\n",
-                pipeline="yellow,0,reset,1",
+        if not data and key not in self.unkown_keys:
+            self.unkown_keys.add(key)
+            print(
+                f"{ansi.BOLD}{ansi.YELLOW}-> unknown key recieved{ansi.RESET}\n",
+                f"   |> name: {key}\n",
+                sep="",
             )
 
         return np.array(data)
